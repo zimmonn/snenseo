@@ -1,0 +1,66 @@
+# -------------------------------
+# Build directories
+# -------------------------------
+build/
+build-*/
+build_*/
+out/
+out-*/
+zephyr/
+
+# Ninja + CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+
+# Generated Zephyr files
+*.log
+*.map
+*.bin
+*.hex
+*.elf
+*.uf2
+*.img
+*.signed.bin
+*.config
+*.ld
+
+# Device Tree generated files
+dts/common/
+dts/bindings_generated/
+zephyr/include/generated/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# West metadata
+.west/
+west.yml.lock
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.pyc
+__pycache__/
+*.tmp
+*~
+.DS_Store
+
+# Backup files
+*.bak
+*.orig
+
+# Boards build artifacts
+boards/**/build/
+boards/**/out/
+
+# Ccache
+.ccache/

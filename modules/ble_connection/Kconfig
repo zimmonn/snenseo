@@ -1,0 +1,23 @@
+menu "Configure Snenseo BLE Connection & Service"
+
+config SNENSEO_BLE_CONNECTION
+  bool "Enable Snenseo BLE connection"
+  depends on BT && BT_PERIPHERAL
+
+config SNENSEO_BLE_CONNECTION_LOG_LEVEL 
+  int "Set log level for the BLE connection"
+  default 3
+  depends on SNENSEO_BLE_CONNECTION && LOG
+
+
+config SNENSEO_BLE_SERVICES_DEV_NAME
+  string "Name to be used in Advertising"
+  default "Snenseo"
+  depends on SNENSEO_BLE_CONNECTION
+
+config SNENSEO_BLE_SVC_LOG_LEVEL 
+  int "Set log level for the BLE connection"
+  default 3
+  depends on SNENSEO_BLE_CONNECTION && LOG
+
+endmenu
