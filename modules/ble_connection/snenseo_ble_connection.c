@@ -20,6 +20,44 @@ static const struct bt_data sd[] = {
         BT_DATA_BYTES(BT_DATA_UUID128_ALL, BT_UUID_SNENSEO_VAL),
 };
 
+/** @brief see bt-fund l3_e2_sol STEP 10 - Define the function to update the connection's data length */
+static void update_data_length(struct bt_conn *conn)
+{
+    int err;
+    struct bt_conn_le_data_len_param my_data_len = {
+        .tx_max_len = BT_GAP_DATA_LEN_MAX,
+        .tx_max_time = BT_GAP_DATA_TIME_MAX,
+    };
+    err = bt_conn_le_data_len_update(conn, &my_data_len);
+    if (err) {
+        LOG_ERR("data_len_update failed (err %d)", err);
+    }
+}
+
+static void exchange_func(struct bt_conn *conn, uint8_t att_err,
+              struct bt_gatt_exchange_params *params)
+{
+    LOG_INF("MTU exchange %s", att_err == 0 ? "successful" : "failed");
+    if (!att_err) {
+        uint16_t payload_mtu = bt_gatt_get_mtu(conn) - 3;   // 3 bytes used for Attribute headers.
+        LOG_INF("New MTU: %d bytes", payload_mtu);
+    }
+}
+
+/* STEP 11.1 - Define the function to update the connection's MTU */
+static void update_mtu(struct bt_conn *conn)
+{
+    int err;
+    static struct bt_gatt_exchange_params exchange_params = {
+        .func = exchange_func,
+    };
+
+    err = bt_gatt_exchange_mtu(conn, &exchange_params);
+    if (err) {
+        LOG_ERR("bt_gatt_exchange_mtu failed (err %d)", err);
+    }
+}
+
 static void adv_work_handler(struct k_work *work)
 {
         int err = bt_le_adv_start(adv_param, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
@@ -54,6 +92,19 @@ static void on_connected(struct bt_conn *conn, uint8_t err)
         }
 
         LOG_INF("Connected\n");
+
+        struct bt_conn_info info;
+	err = bt_conn_get_info(conn, &info);
+	if (err) {
+		LOG_ERR("bt_conn_get_info() returned %d", err);
+		return;
+	}
+	/* STEP 1.2 - Add the connection parameters to your log */
+	double connection_interval = info.le.interval*1.25; // in ms
+	uint16_t supervision_timeout = info.le.timeout*10; // in ms
+	LOG_INF("Connection parameters: interval %.2f ms, latency %d intervals, timeout %d ms", connection_interval, info.le.latency, supervision_timeout);
+        update_data_length(conn);
+	update_mtu(conn);
 }
 
 static void on_disconnected(struct bt_conn *conn, uint8_t reason)
@@ -61,10 +112,20 @@ static void on_disconnected(struct bt_conn *conn, uint8_t reason)
         LOG_WRN("Disconnected (reason %u)\n", reason);
 }
 
+void on_le_data_len_updated(struct bt_conn *conn, struct bt_conn_le_data_len_info *info)
+{
+    uint16_t tx_len     = info->tx_max_len; 
+    uint16_t tx_time    = info->tx_max_time;
+    uint16_t rx_len     = info->rx_max_len;
+    uint16_t rx_time    = info->rx_max_time;
+    LOG_INF("Data length updated. Length %d/%d bytes, time %d/%d us", tx_len, rx_len, tx_time, rx_time);
+}
+
 struct bt_conn_cb connection_callbacks = {
         .connected = on_connected,
         .disconnected = on_disconnected,
         .recycled = recycled_cb,
+        .le_data_len_updated = on_le_data_len_updated,
 };
 
 int snenseo_ble_connection_init( void ) {
