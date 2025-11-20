@@ -6,10 +6,11 @@
 
 #include <stdio.h>
 #include "snenseo_ble_connection.h"
+#include "snenseo_machine.h"
 
 int main(void)
 {
-	printf("Hello World! modded %s\n", CONFIG_BOARD_TARGET);
+	snenseo_init_machine();
 	printf("Initializing Snenseo connection\n");
 	if (!snenseo_ble_connection_init()) {
 		printf("Failed to initialize Snenseo connection\n");

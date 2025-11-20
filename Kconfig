@@ -2,5 +2,5 @@
 
 mainmenu "Snenseo"
 
-rsource "modules/ble_connection/Kconfig"
+rsource "modules/Kconfig"
 source "Kconfig.zephyr"

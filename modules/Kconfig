@@ -1,0 +1,2 @@
+rsource "snenseo_machine/Kconfig"
+rsource "ble_connection/Kconfig"

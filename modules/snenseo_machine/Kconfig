@@ -1,0 +1,12 @@
+menu "Configure Snenseo machine" 
+
+config SNENSEO_MACHINE
+  bool "Enable the Snenseo Machine Module"
+  default n
+  
+config SNENSEO_MACHINE_LOG_LEVEL
+  int "Set log level of Snenseo machine"
+  default 3
+  depends on SNENSEO_MACHINE && LOG
+  
+endmenu
