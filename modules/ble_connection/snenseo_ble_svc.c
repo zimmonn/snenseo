@@ -6,6 +6,10 @@ LOG_MODULE_REGISTER(snenseo_svc, CONFIG_SNENSEO_BLE_SVC_LOG_LEVEL);
 static uint8_t indicate_enabled = 0;
 static struct bt_gatt_indicate_params ind_params;
 
+/** @brief static callback variables */
+static snenseo_write_set_time_handler_t __handler_set_time = NULL;
+static snenseo_write_trun_on_handler_t __handler_turn_on = NULL;
+
 // This function is called when a remote device has acknowledged the indication at its host layer
 static void indicate_cb(struct bt_conn *conn, struct bt_gatt_indicate_params *params, uint8_t err)
 {
@@ -40,6 +44,12 @@ static void sneseo_write_set_time_cb(const void *buf) {
             time->tm_wday,
             time->tm_yday,
             time->tm_isdst);
+	if (__handler_set_time == NULL) {
+		LOG_WRN("No set time handler registered");
+		return;
+	}
+	// TODO: Is this problematic?
+	__handler_set_time(*time); 
 }
 
 static ssize_t snenseo_write_set_time(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -63,7 +73,12 @@ static void snenseo_write_turn_on_cb(uint8_t val) {
 		LOG_DBG("Received 0x%02x, Snenseo only turns on if 0x01 is received", val);
 		return;
 	} 
-	LOG_INF("Snenseo should call write turn on handler now");
+	if (__handler_turn_on == NULL) {
+		LOG_WRN("No turn on handler registerd");
+		return;
+	}
+	LOG_INF("Snenseo calling write turn on handler now");
+	__handler_turn_on();
 }
 
 static ssize_t snenseo_write_turn_on(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -118,4 +133,12 @@ void snenseo_incicate_empty(uint8_t empty) {
         if (ret != 0) {
                 LOG_ERR("Failed to send indication (err %d)", ret);
         }
+}
+
+void senseo_register_set_time_handler(snenseo_write_set_time_handler_t handler) {
+	__handler_set_time = handler;
+}
+
+void snenseo_register_turn_on_handler(snenseo_write_trun_on_handler_t handler) {
+	__handler_turn_on = handler;
 }

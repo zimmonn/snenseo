@@ -33,6 +33,9 @@ extern "C" {
     BT_UUID_128_ENCODE(BT_UID_SNENSEO_BASE+3, 0x82e2, 0x4279, 0x939f, 0x619a6607319c)
 #define BT_UUID_SNENSEO_TURN_ON BT_UUID_DECLARE_128(BT_UUID_SNENSEO_TURN_ON_VAL)
 
+BUILD_ASSERT(sizeof(int) >= sizeof(int32_t),
+             "RTC driver uses int smaller than snenseo_rtc_time fields! Problems could occur :(");
+
 /**
  * @brief Structure for storing date and time values with sub-second precision.
  *
@@ -42,20 +45,44 @@ extern "C" {
  * @note This is just a copy from @ref drivers/rtc.h
  */
 struct snenseo_rtc_time {
-	uint32_t tm_sec;	/**< Seconds [0, 59] */
-	uint32_t tm_min;	/**< Minutes [0, 59] */
-	uint32_t tm_hour;	/**< Hours [0, 23] */
-	uint32_t tm_mday;	/**< Day of the month [1, 31] */
-	uint32_t tm_mon;	/**< Month [0, 11] */
-	uint32_t tm_year;	/**< Year - 1900 */
-	uint32_t tm_wday;	/**< Day of the week [0, 6] (Sunday = 0) (Unknown = -1) */
-	uint32_t tm_yday;	/**< Day of the year [0, 365] (Unknown = -1) */
-	uint32_t tm_isdst;	/**< Daylight saving time flag [-1] (Unknown = -1) */
-	uint32_t tm_nsec;	/**< Nanoseconds [0, 999999999] (Unknown = 0) */
+	int32_t tm_sec;	/**< Seconds [0, 59] */
+	int32_t tm_min;	/**< Minutes [0, 59] */
+	int32_t tm_hour;	/**< Hours [0, 23] */
+	int32_t tm_mday;	/**< Day of the month [1, 31] */
+	int32_t tm_mon;	/**< Month [0, 11] */
+	int32_t tm_year;	/**< Year - 1900 */
+	int32_t tm_wday;	/**< Day of the week [0, 6] (Sunday = 0) (Unknown = -1) */
+	int32_t tm_yday;	/**< Day of the year [0, 365] (Unknown = -1) */
+	int32_t tm_isdst;	/**< Daylight saving time flag [-1] (Unknown = -1) */
+	int32_t tm_nsec;	/**< Nanoseconds [0, 999999999] (Unknown = 0) */
 };
 
 /** @brief Snenseo set time Characteristic length */
 #define SNENSEO_SET_TIME_CHAR_LEN sizeof(struct snenseo_rtc_time)
+
+/** @brief Snenseo write set time characteristic handler function pointer signature*/
+typedef void (* snenseo_write_set_time_handler_t) ( struct snenseo_rtc_time ); 
+
+/** @brief Snenseo write turn on characteristic handler function pointer signature*/
+typedef void (* snenseo_write_trun_on_handler_t) ( void ); 
+
+/**
+ * @brief Register Snenseo set time handler
+ * 
+ * @note If called twice first handler is overwritten without mercy. Register Null for unregister.
+ * 
+ * @param handler Handler to be called when characteristic is being written by GATT client  
+ */
+void senseo_register_set_time_handler(snenseo_write_set_time_handler_t handler);
+
+/**
+ * @brief Register Snenseo turn on handler
+ * 
+ * @note If called twice first handler is overwritten without mercy. Register Null for unregister.
+ * 
+ * @param handler Handler to be called when characteristic is being written by GATT client  
+ */
+void senseo_register_turn_on_handler(snenseo_write_trun_on_handler_t handler);
 
 #ifdef __cplusplus
 }
