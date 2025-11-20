@@ -5,8 +5,6 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/conn.h>
-//#include <zephyr/bluetooth/uuid.h>
-//#include <zephyr/bluetooth/gatt.h>
 
 #ifdef __cplusplus
 extern "C" {

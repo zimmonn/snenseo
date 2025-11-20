@@ -28,6 +28,11 @@ extern "C" {
     BT_UUID_128_ENCODE(BT_UID_SNENSEO_BASE+2, 0x82e2, 0x4279, 0x939f, 0x619a6607319c)
 #define BT_UUID_SNENSEO_SET_TIME BT_UUID_DECLARE_128(BT_UUID_SNENSEO_SET_TIME_VAL)
 
+/** @brief Snenseo turn on Characteristic UUID */
+#define BT_UUID_SNENSEO_TURN_ON_VAL \
+    BT_UUID_128_ENCODE(BT_UID_SNENSEO_BASE+3, 0x82e2, 0x4279, 0x939f, 0x619a6607319c)
+#define BT_UUID_SNENSEO_TURN_ON BT_UUID_DECLARE_128(BT_UUID_SNENSEO_TURN_ON_VAL)
+
 /**
  * @brief Structure for storing date and time values with sub-second precision.
  *

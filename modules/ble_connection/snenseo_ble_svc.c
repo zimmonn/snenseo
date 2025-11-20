@@ -27,7 +27,7 @@ static ssize_t read_snenseo_empty(struct bt_conn *conn, const struct bt_gatt_att
     return bt_gatt_attr_read(conn, attr, buf, len, offset, (void*) &empty, 1);;
 }
 
-static void write_sneseo_set_time_cb(const void *buf) {
+static void sneseo_write_set_time_cb(const void *buf) {
 	struct snenseo_rtc_time* time = (struct snenseo_rtc_time*) buf; 
     LOG_DBG("RTC Time: %04u-%02u-%02u %02u:%02u:%02u.%09u (wday=%u, yday=%u, isdst=%d)",
             time->tm_year - 1900,  // tm_year is years since 1900
@@ -42,37 +42,67 @@ static void write_sneseo_set_time_cb(const void *buf) {
             time->tm_isdst);
 }
 
-static ssize_t write_snenseo_set_time(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+static ssize_t snenseo_write_set_time(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 									  const void *buf, uint16_t len, uint16_t offset,
 									  uint8_t flags) {
-	LOG_DBG("Attribute write, handle: %u, conn: %p", attr->handle, (void *)conn);
+	LOG_DBG("Set Time attribute write, handle: %u, conn: %p", attr->handle, (void *)conn);
 	if (len != SNENSEO_SET_TIME_CHAR_LEN) {
-  		LOG_DBG("Write MyCharacteristic: Incorrect data length");
+  		LOG_DBG("Write Set Time: Incorrect data length");
   		return BT_GATT_ERR(BT_ATT_ERR_INVALID_ATTRIBUTE_LEN);
     }
     if (offset != 0) {
-    	LOG_DBG("Write MyCharacteristic: Incorrect data offset");
+    	LOG_DBG("Write Set Time: Incorrect data offset");
     	return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
     }
-	write_sneseo_set_time_cb(buf);
+	sneseo_write_set_time_cb(buf);
+	return len;
+}
+
+static void snenseo_write_turn_on_cb(uint8_t val) {
+	if (val != 1) {
+		LOG_DBG("Received 0x%02x, Snenseo only turns on if 0x01 is received", val);
+		return;
+	} 
+	LOG_INF("Snenseo should call write turn on handler now");
+}
+
+static ssize_t snenseo_write_turn_on(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+									  const void *buf, uint16_t len, uint16_t offset,
+									  uint8_t flags) {
+	LOG_DBG("Turn On attribute write, handle: %u, conn: %p", attr->handle, (void *)conn);
+	if (len != sizeof(uint8_t)) {
+  		LOG_DBG("Write Turn On: Incorrect data length");
+  		return BT_GATT_ERR(BT_ATT_ERR_INVALID_ATTRIBUTE_LEN);
+    }
+    if (offset != 0) {
+    	LOG_DBG("Write Turn On: Incorrect data offset");
+    	return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
+    }
+	snenseo_write_turn_on_cb(*(uint8_t*)buf);
 	return len;
 }
 
 BT_GATT_SERVICE_DEFINE(snenseo_svc,
-        BT_GATT_PRIMARY_SERVICE(BT_UUID_SNENSEO),
-        BT_GATT_CHARACTERISTIC( BT_UUID_SNENSEO_EMPTY, 
-        		                BT_GATT_CHRC_READ | BT_GATT_CHRC_INDICATE, 
-        			            BT_GATT_PERM_READ, 
-        			            read_snenseo_empty, 
-        			            NULL, 
-        			            NULL),
-        BT_GATT_CCC(snenseo_ccc_cfg_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
-		BT_GATT_CHARACTERISTIC( BT_UUID_SNENSEO_SET_TIME, 
-        		                BT_GATT_CHRC_WRITE, 
-        			            BT_GATT_PERM_WRITE, 
-        			            NULL, 
-        			            write_snenseo_set_time, 
-        			            NULL),
+    BT_GATT_PRIMARY_SERVICE(BT_UUID_SNENSEO),
+    BT_GATT_CHARACTERISTIC( BT_UUID_SNENSEO_EMPTY, 
+    		                BT_GATT_CHRC_READ | BT_GATT_CHRC_INDICATE, 
+    			            BT_GATT_PERM_READ, 
+    			            read_snenseo_empty, 
+    			            NULL, 
+    			            NULL),
+    BT_GATT_CCC(snenseo_ccc_cfg_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+	BT_GATT_CHARACTERISTIC( BT_UUID_SNENSEO_SET_TIME, 
+    		                BT_GATT_CHRC_WRITE, 
+    			            BT_GATT_PERM_WRITE, 
+    			            NULL, 
+    			            snenseo_write_set_time, 
+    			            NULL),
+	BT_GATT_CHARACTERISTIC( BT_UUID_SNENSEO_TURN_ON, 
+    		                BT_GATT_CHRC_WRITE, 
+    			            BT_GATT_PERM_WRITE, 
+    			            NULL, 
+    			            snenseo_write_turn_on, 
+    			            NULL),
 );
 
 void snenseo_incicate_empty(uint8_t empty) {
