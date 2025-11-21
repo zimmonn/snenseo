@@ -141,4 +141,5 @@ void senseo_register_set_time_handler(snenseo_write_set_time_handler_t handler) 
 
 void snenseo_register_turn_on_handler(snenseo_write_trun_on_handler_t handler) {
 	__handler_turn_on = handler;
+	LOG_INF("COOL, turn on should be possible now :)");
 }

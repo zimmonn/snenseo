@@ -11,6 +11,7 @@
 int main(void)
 {
 	snenseo_init_machine();
+	snenseo_register_turn_on_handler(snenseo_machine_turn_on);
 	printf("Initializing Snenseo connection\n");
 	if (!snenseo_ble_connection_init()) {
 		printf("Failed to initialize Snenseo connection\n");

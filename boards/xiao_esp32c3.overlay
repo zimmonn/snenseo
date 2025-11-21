@@ -1,0 +1,32 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/ {
+	aliases {
+		snenseo-rtc = &ds3231_rtc;
+		snenseo-pin = &snenseo_pin;
+	};
+
+	leds {
+        compatible = "gpio-leds";
+        snenseo_pin: led_0 {
+            gpios = <&xiao_d 6 GPIO_ACTIVE_LOW>;
+            label = "snenseo pin";
+        };
+	};
+};
+
+&i2c0 {
+	ds3231: ds3231@68 {
+        	compatible = "maxim,ds3231-mfd";
+        	reg = <0x68>;
+        	status = "okay";
+
+		ds3231_rtc: ds3231_rtc {
+                	compatible = "maxim,ds3231-rtc";
+                	status = "okay";
+			isw-gpios = <&gpio0 2 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+		};
+	};
+};

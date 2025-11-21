@@ -9,6 +9,8 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/gpio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +23,11 @@ extern "C" {
  * This is what makes a Senseo to a Snenseo  
  */
 int snenseo_init_machine(void);
+
+/**
+ * @brief This function submits work that pushes coffee button with transistor 
+ */
+void snenseo_machine_turn_on(void);
 
 
 #ifdef __cplusplus

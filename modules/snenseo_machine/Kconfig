@@ -3,10 +3,16 @@ menu "Configure Snenseo machine"
 config SNENSEO_MACHINE
   bool "Enable the Snenseo Machine Module"
   default n
+  depends on GPIO
   
 config SNENSEO_MACHINE_LOG_LEVEL
   int "Set log level of Snenseo machine"
   default 3
   depends on SNENSEO_MACHINE && LOG
-  
+
+config SNENSEO_MACHINE_PULE_PERIOD
+  int "Set pulse period for button press in ms"
+  default 500
+  depends on SNENSEO_MACHINE
+
 endmenu
