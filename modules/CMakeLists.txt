@@ -1,2 +1,3 @@
 add_subdirectory(ble_connection)
 add_subdirectory(snenseo_machine)
+add_subdirectory(snenseo_time)

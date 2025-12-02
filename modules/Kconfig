@@ -1,2 +1,3 @@
 rsource "snenseo_machine/Kconfig"
 rsource "ble_connection/Kconfig"
+rsource "snenseo_time/Kconfig"

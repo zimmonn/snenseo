@@ -4,8 +4,8 @@
  * @brief This modules is responsible for interacting with the Senseo machin, making it a Snenseo machine 
  */
 
-#ifndef SNENSEO_MACHINEC_H
-#define SNENSEO_MACHINEC_H
+#ifndef SNENSEO_MACHINE_H
+#define SNENSEO_MACHINE_H
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -34,4 +34,4 @@ void snenseo_machine_turn_on(void);
 }
 #endif
 
-#endif  /* SNENSEO_MACHINEC_H */
+#endif  /* SNENSEO_MACHINE_H */

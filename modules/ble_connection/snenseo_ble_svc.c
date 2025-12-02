@@ -135,7 +135,7 @@ void snenseo_incicate_empty(uint8_t empty) {
         }
 }
 
-void senseo_register_set_time_handler(snenseo_write_set_time_handler_t handler) {
+void snenseo_register_set_time_handler(snenseo_write_set_time_handler_t handler) {
 	__handler_set_time = handler;
 }
 

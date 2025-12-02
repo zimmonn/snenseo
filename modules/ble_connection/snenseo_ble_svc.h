@@ -73,7 +73,7 @@ typedef void (* snenseo_write_trun_on_handler_t) ( void );
  * 
  * @param handler Handler to be called when characteristic is being written by GATT client  
  */
-void senseo_register_set_time_handler(snenseo_write_set_time_handler_t handler);
+void snenseo_register_set_time_handler(snenseo_write_set_time_handler_t handler);
 
 /**
  * @brief Register Snenseo turn on handler
@@ -82,7 +82,7 @@ void senseo_register_set_time_handler(snenseo_write_set_time_handler_t handler);
  * 
  * @param handler Handler to be called when characteristic is being written by GATT client  
  */
-void senseo_register_turn_on_handler(snenseo_write_trun_on_handler_t handler);
+void snenseo_register_turn_on_handler(snenseo_write_trun_on_handler_t handler);
 
 #ifdef __cplusplus
 }

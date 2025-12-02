@@ -1,0 +1,28 @@
+menu "Configure Snenseo time" 
+
+config SNENSEO_TIME
+  bool "Enable the Snenseo Machine module"
+  default n
+  depends on RTC
+  
+config SNENSEO_TIME_LOG_LEVEL
+  int "Set log level of Snenseo time module"
+  default 3
+  depends on SNENSEO_TIME && LOG
+
+config SNENSEO_TIME_SLEEP_PERIOD
+  int "Set sleep period of polling RTC time"
+  default 2000
+  depends on SNENSEO_TIME
+
+config SNENSEO_TIME_STACK_SIZE
+  int "Default stack size for Snenseo time module"
+  default 512
+  depends on SNENSEO_TIME
+
+config SNENSEO_TIME_THREAD_PRIO
+  int "Default prio for Snenseo time module thread"
+  default 7
+  depends on SNENSEO_TIME
+
+endmenu
