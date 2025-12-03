@@ -47,24 +47,51 @@ void snenseo_set_timer(struct snenseo_rtc_time *trig_tim, uint8_t weekdays, stru
  * @return WAITING if current date is earlier than timer date
  */
 static time_state_t date_for_coffee(struct rtc_time *curr_time, struct snenseo_rtc_time *trig_tim) {
-    if ((curr_time->tm_year + 1900) > trig_tim->tm_year) return EXPIRED;
-    if ((curr_time->tm_mon + 1) > trig_tim->tm_mon) return EXPIRED;
-    if (curr_time->tm_mday > trig_tim->tm_mday) return EXPIRED;
-    if (((curr_time->tm_year + 1900) == trig_tim->tm_year)  &
-        ((curr_time->tm_mon + 1) == trig_tim->tm_mon)       &
-        (curr_time->tm_mday > trig_tim->tm_mday)
-        ) return ON_DATE;
+    // Current date is clearly past trigger
+    if (curr_time->tm_year > trig_tim->tm_year ||
+        (curr_time->tm_year == trig_tim->tm_year && curr_time->tm_mon > trig_tim->tm_mon) ||
+        (curr_time->tm_year == trig_tim->tm_year && curr_time->tm_mon == trig_tim->tm_mon && 
+         curr_time->tm_mday > trig_tim->tm_mday)) {
+        return EXPIRED;
+    }
+    
+    // Exact date match
+    if (curr_time->tm_year == trig_tim->tm_year &&
+        curr_time->tm_mon == trig_tim->tm_mon &&
+        curr_time->tm_mday == trig_tim->tm_mday) {
+        return ON_DATE;
+    }
+    
+    // Current date is before trigger date
     return WAITING;
 }
 
-static void time_for_coffee(struct rtc_time *curr_time, timer_task_t * task) {
-    if (curr_time->tm_hour != task->trig_tim.tm_hour) return;
-    if (curr_time->tm_min != task->trig_tim.tm_min) return;
-    int delta_t = curr_time->tm_sec - task->trig_tim.tm_sec;
-    if (delta_t < 0) return;
-    if (delta_t < CONFIG_SNENSEO_TIME_SLEEP_PERIOD) {
-        k_work_submit(task->tt_work);
+static void time_for_coffee(struct rtc_time *curr_time, timer_task_t *task) {
+    // Extract trigger time (fix type cast - assuming snenseo_rtc_time has same layout)
+    struct snenseo_rtc_time trig = task->trig_tim;
+    /*
+    LOG_ERR("CURR: %04d-%02d-%02d %02d:%02d:%02d", 
+            curr_time->tm_year + 1900, curr_time->tm_mon + 1, curr_time->tm_mday,
+            curr_time->tm_hour, curr_time->tm_min, curr_time->tm_sec);
+    LOG_ERR("TRIGG: %04d-%02d-%02d %02d:%02d:%02d", 
+            trig.tm_year + 1900, trig.tm_mon + 1, trig.tm_mday,
+            trig.tm_hour, trig.tm_min, trig.tm_sec);
+    */
+    // Check if hour and minute match exactly
+    if (curr_time->tm_hour != trig.tm_hour || 
+        curr_time->tm_min != trig.tm_min) {
+        return;  // Not the right time yet
     }
+    
+    // Calculate seconds delta (trigger_sec could be 0-59)
+    int delta_t = curr_time->tm_sec - trig.tm_sec;
+    delta_t*=1000;
+    if (delta_t < 0 || delta_t >= CONFIG_SNENSEO_TIME_SLEEP_PERIOD) {
+        return;  // Too early or window expired
+    }
+    
+    // Trigger the work within the time window
+    k_work_submit(task->tt_work);
 }
 
 int snenseo_init_time(void) {
@@ -95,14 +122,13 @@ static void get_date_time_update() {
             return;
     }
     LOG_INF("RTC date and time: %04d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900,
-           tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+           tm.tm_mon + 1, tm.tm_mday + 1, tm.tm_hour, tm.tm_min, tm.tm_sec);
         
     timer_task_t *curr = tt_head;
     timer_task_t *prev = NULL;
-    if (curr == NULL ) LOG_ERR("WHY");
     while (curr != NULL) {
-        LOG_INF("Timer date and time: %04d-%02d-%02d %02d:%02d:%02d", curr->trig_tim.tm_year,
-               curr->trig_tim.tm_mon, curr->trig_tim.tm_mday, curr->trig_tim.tm_hour, 
+        LOG_INF("Timer date and time: %04d-%02d-%02d %02d:%02d:%02d", curr->trig_tim.tm_year + 1900,
+               curr->trig_tim.tm_mon + 1, curr->trig_tim.tm_mday + 1, curr->trig_tim.tm_hour, 
                curr->trig_tim.tm_min, curr->trig_tim.tm_sec
             );
         timer_task_t *next = curr->next;  // Cache next BEFORE any changes
@@ -110,10 +136,11 @@ static void get_date_time_update() {
         if (curr->week_days == 0) {
             switch(date_for_coffee(&tm, &curr->trig_tim)) {
                 case ON_DATE:
-                    time_for_coffee(&tm, curr);  // Fixed parens
+                    time_for_coffee(&tm, curr);
                     break;
 
                 case EXPIRED:
+                    LOG_ERR("Expired?");
                     if (prev != NULL) {
                         prev->next = next;    // Safe: next already cached
                     } else {
@@ -123,6 +150,7 @@ static void get_date_time_update() {
                     curr = next;              // Skip deleted node
                     continue;                 // Don't update prev/curr below
                 default:
+                    LOG_ERR("Default");
                     break;
             }
         }
@@ -152,10 +180,8 @@ static void snenseo_tread(void) {
             LOG_ERR("Cannot read date time: %d", ret);
             return;
     }
-    tm.tm_sec+= 10;
+    tm.tm_sec += 4;
     tm.tm_sec %= 60;
-    tm.tm_year += 1900;
-    tm.tm_mon += 1;
     LOG_INF("RTC TIMER date and time: %04d-%02d-%02d %02d:%02d:%02d", tm.tm_year,
            tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
     snenseo_set_timer((struct snenseo_rtc_time *)&tm, 0, &demo_work);
