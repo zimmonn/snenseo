@@ -17,7 +17,7 @@ config SNENSEO_TIME_SLEEP_PERIOD
 
 config SNENSEO_TIME_STACK_SIZE
   int "Default stack size for Snenseo time module"
-  default 512
+  default 1024
   depends on SNENSEO_TIME
 
 config SNENSEO_TIME_THREAD_PRIO

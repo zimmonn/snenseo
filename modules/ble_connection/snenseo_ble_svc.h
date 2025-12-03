@@ -37,6 +37,19 @@ BUILD_ASSERT(sizeof(int) >= sizeof(int32_t),
              "RTC driver uses int smaller than snenseo_rtc_time fields! Problems could occur :(");
 
 /**
+ * @brief Enum for weekday bits
+ */
+typedef enum {
+	SUN = 1,
+	MON = 2,
+	TUE = 4,
+	WEN = 8,
+	THR = 16,
+	FRI = 32, 
+	SAT = 64  
+} weekdays_t;
+
+/**
  * @brief Structure for storing date and time values with sub-second precision.
  *
  * @details The structure is 1-1 mapped to the struct tm for the members
@@ -61,7 +74,7 @@ struct snenseo_rtc_time {
 #define SNENSEO_SET_TIME_CHAR_LEN sizeof(struct snenseo_rtc_time)
 
 /** @brief Snenseo write set time characteristic handler function pointer signature*/
-typedef void (* snenseo_write_set_time_handler_t) ( struct snenseo_rtc_time ); 
+typedef void (* snenseo_write_set_time_handler_t) ( struct snenseo_rtc_time* ); 
 
 /** @brief Snenseo write turn on characteristic handler function pointer signature*/
 typedef void (* snenseo_write_trun_on_handler_t) ( void ); 

@@ -19,11 +19,11 @@ int main(void)
 	snenseo_register_set_time_handler(snenseo_time_set_date_time);
 	#endif
 	snenseo_register_turn_on_handler(snenseo_machine_turn_on);
-	printf("Initializing Snenseo connection\n");
+	printk("Initializing Snenseo connection\n");
 	if (!snenseo_ble_connection_init()) {
-		printf("Failed to initialize Snenseo connection\n");
+		printk("Failed to initialize Snenseo connection\n");
 		return 0;
 	}
-	printf("Initializing Snenseo connection success\n");
+	printk("Initializing Snenseo connection success\n");
 	return 0;
 }

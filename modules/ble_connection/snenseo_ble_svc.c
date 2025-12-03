@@ -49,7 +49,7 @@ static void sneseo_write_set_time_cb(const void *buf) {
 		return;
 	}
 	// TODO: Is this problematic?
-	__handler_set_time(*time); 
+	__handler_set_time(time); 
 }
 
 static ssize_t snenseo_write_set_time(struct bt_conn *conn, const struct bt_gatt_attr *attr,
