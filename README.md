@@ -1,4 +1,9 @@
 # Snenseo 
+# 🚨 WIP 🚨
+
+This project is not finished... Yet! 
+But stay tuned. I am working on it 😬
+
 Snenseo is a zepyhr based firmware that implements a BLE device and is able to interact with a [Senseo coffe machine](https://www.senseo.us/about-senseo/the-senseo-coffee-pod-system/).
 
 ![Here should be a picture of a senseo machine](https://www.kaffeewiki.de/images/thumb/1/16/Senseo.jpg/300px-Senseo.jpg)
