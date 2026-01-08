@@ -10,8 +10,13 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/device.h>
+
+#ifdef CONFIG_BOARD_NATIVE_SIM
+    #include "native_rtc.h"
+#endif
 #include <zephyr/drivers/rtc.h>
 #include "snenseo_ble_svc.h"
+
 
 #ifdef __cplusplus
 extern "C" {

@@ -116,7 +116,9 @@ void snenseo_time_set_date_time(struct snenseo_rtc_time* tm) {
 static void get_date_time_update() {
     int ret = 0;
     struct rtc_time tm;
+
     ret = rtc_get_time(rtc, &tm);
+
     if (ret < 0) {
             LOG_ERR("Cannot read date time: %d", ret);
             return;
